@@ -1,1 +1,1 @@
-[text](https://rapidapi.com/blog/seeking-alpha-api-with-python-php-ruby-javascript-examples/)
+[Seeking Alpha API Documentation](https://rapidapi.com/blog/seeking-alpha-api-with-python-php-ruby-javascript-examples/)
