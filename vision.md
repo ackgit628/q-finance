@@ -6,7 +6,7 @@ Need to reasearch how these scores will be calculated.
 
 Next, we need to score the entire universe of stocks. Will need to create a database at some point.
 Then we pick a portfolio of 25 stocks as per our strategy.
-Quality + Growth and Value + Momentum can be a great case study.
+Quality + Growth and Value + Momentum can be great case studies.
 We may need to perform some backtests as well before investing.
 
 Steps to achieve this vision (in no particular order)
