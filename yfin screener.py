@@ -3,18 +3,31 @@ from yfinance import EquityQuery
 import json
 
 q = EquityQuery('and', [
-       EquityQuery('gt', ['intradaymarketcap', 0]),
+       EquityQuery('gt', ['intradaymarketcap', 10000000000]),
        EquityQuery('eq', ['region', 'in']),
        EquityQuery('eq', ['exchange', 'NSI'])
 ])
-response = yf.screen(q, offset=250, size=250, sortField='intradaymarketcap', sortAsc=True)
+x = 0
+a = []
+response = yf.screen(q, offset=0, size=250, sortField='intradaymarketcap', sortAsc=False)
 
-for quote in response.quotes:
-    print(quote['symbol'])
+while x<response['total']:
+    response = yf.screen(q, offset=x, size=250, sortField='intradaymarketcap', sortAsc=False)
+    for quote in response['quotes']:
+        a.append(quote['symbol'])
+    x+=250
+# Print the response to understand its structure
+print(len(a))
+print(a)
+
+# # Assuming the quotes are in the 'quotes' key of the response dictionary
+# if 'quotes' in response:
+#     for quote in response['quotes']:
+#         print(quote['symbol'])
 
 # json_filename = 'screen.json'
 # with open(json_filename, 'w') as json_file:
-#     json.dump(response, json_file, indent=4)
+#     json.dump(response, json_file, indent=4, default=str)
 
 # print("Data saved to", json_filename)
 
