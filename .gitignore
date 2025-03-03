@@ -2,5 +2,6 @@ q-finance.code-workspace
 examples
 seeking alpha api.py
 test.json
-temp lib.py
-yfin api.py
+download.json
+screen.json
+temp.py
