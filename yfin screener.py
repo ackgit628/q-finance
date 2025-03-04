@@ -1,40 +1,77 @@
 import yfinance as yf
 from yfinance import EquityQuery
-import json
+import time
+import logging
 
+# ------------------------------------------------------------
+# Set Up Logging
+# ------------------------------------------------------------
+# Logging is configured to output timestamps and log levels. This helps track the code's progress and diagnose issues.
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# ------------------------------------------------------------
+# Define the Query
+# ------------------------------------------------------------
+# Here, we build a query using EquityQuery that filters for:
+# - intradaymarketcap greater than 10,000,000,000 (i.e., 1000 Cr)
+# - region 'in' (India)
+# - exchange 'NSI'
 q = EquityQuery('and', [
-       EquityQuery('gt', ['intradaymarketcap', 10000000000]),
-       EquityQuery('eq', ['region', 'in']),
-       EquityQuery('eq', ['exchange', 'NSI'])
+    EquityQuery('gt', ['intradaymarketcap', 10000000000]),
+    EquityQuery('eq', ['region', 'in']),
+    EquityQuery('eq', ['exchange', 'NSI'])
 ])
-x = 0
-a = []
-response = yf.screen(q, offset=0, size=250, sortField='intradaymarketcap', sortAsc=False)
 
-while x<response['total']:
-    response = yf.screen(q, offset=x, size=250, sortField='intradaymarketcap', sortAsc=False)
-    for quote in response['quotes']:
-        a.append(quote['symbol'])
-    x+=250
-# Print the response to understand its structure
-print(len(a))
-print(a)
+# ------------------------------------------------------------
+# Initialize Variables for Pagination
+# ------------------------------------------------------------
+symbols = []           # List to store fetched ticker symbols
+offset = 0             # Starting offset for pagination
+page_size = 250        # Number of records per page
 
-# # Assuming the quotes are in the 'quotes' key of the response dictionary
-# if 'quotes' in response:
-#     for quote in response['quotes']:
-#         print(quote['symbol'])
+# ------------------------------------------------------------
+# Initial Request to Determine Total Results
+# ------------------------------------------------------------
+try:
+    response = yf.screen(q, offset=offset, size=page_size, sortField='intradaymarketcap', sortAsc=False)
+    total_results = response.get('total', 0)
+    logging.info(f"Total results found: {total_results}")
+except Exception as e:
+    logging.error(f"Failed to fetch initial results: {e}")
+    total_results = 0
 
-# json_filename = 'screen.json'
-# with open(json_filename, 'w') as json_file:
-#     json.dump(response, json_file, indent=4, default=str)
+# ------------------------------------------------------------
+# Fetch Data in a Paginated Manner with Error Handling and Rate Limiting
+# ------------------------------------------------------------
+while offset < total_results:
+    try:
+        logging.info(f"Fetching results with offset: {offset}")
+        response = yf.screen(q, offset=offset, size=page_size, sortField='intradaymarketcap', sortAsc=False)
+        quotes = response.get('quotes', [])
+        for quote in quotes:
+            # Append the symbol if it exists; using .get ensures we avoid KeyError if missing
+            symbol = quote.get('symbol')
+            if symbol:
+                symbols.append(symbol)
+        offset += page_size
 
-# print("Data saved to", json_filename)
+        # ------------------------------------------------------------
+        # Rate Limiting
+        # ------------------------------------------------------------
+        # Adding a delay prevents overwhelming the API and helps manage request rate limits.
+        time.sleep(1)
+    except Exception as e:
+        logging.error(f"Error while fetching results at offset {offset}: {e}")
+        # Depending on your requirements, you might choose to skip this page or break out of the loop.
+        break
 
-# Run the screen query to fetch equities meeting the criteria.
-# try:
-#     result = yf.screen(q)
-#     print("Screened equities with marketCap > 0:")
-#     print(result)
-# except Exception as e:
-#     print("An error occurred during screening:", e)
+# Optional: Remove duplicates if they occur
+# symbols = list(set(symbols))
+# commenting as sorted order is lost
+
+# ------------------------------------------------------------
+# Final Output
+# ------------------------------------------------------------
+# Print the number of unique symbols fetched and the list itself.
+print(f"Total unique symbols fetched: {len(symbols)}")
+print(symbols)
