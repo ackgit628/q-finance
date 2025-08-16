@@ -71,7 +71,7 @@ while offset < total_results:
 
 # ------------------------------------------------------------
 # Final Output
-# ------------------------------------------------------------
+# ----------------------------------------- -------------------
 # Print the number of unique symbols fetched and the list itself.
 print(f"Total unique symbols fetched: {len(symbols)}")
 print(symbols)
